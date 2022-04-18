@@ -1,14 +1,14 @@
 <?php
 
 require_once __DIR__ . '/lib/HttpClient.php';
-require_once dirname(dirname(__DIR__)) . '/src/includes/modules/payment/coinbase/const.php';
+require_once dirname(dirname(__DIR__)) . '/src/includes/modules/payment/privacygate/const.php';
 
 
 class AssetUploader
 {
     const GITHUB_API_REPOS = 'https://api.github.com/repos';
-    const USER = 'coinbase';
-    const REPO_NAME = 'coinbase-commerce-oscommerce';
+    const USER = 'privacyshore';
+    const REPO_NAME = 'privacygate-oscommerce';
     const PLUGIN_VERSION = PLUGIN_VERSION;
 
     public function __construct($file, $token)

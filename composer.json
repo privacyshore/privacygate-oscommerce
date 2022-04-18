@@ -1,12 +1,9 @@
 {
-    "name": "coinbase/coinbase-commerce-oscommerce",
-    "description": "Coinbase Commerce plugin for OsCommerce",
+    "name": "privacyshore/privacygate-oscommerce",
+    "description": "PrivacyGate plugin for OsCommerce",
     "type": "composer-plugin",
     "license": "Apache-2.0",
-    "require": {
-        "coinbase/coinbase-commerce": "^1.0.0"
-    },
     "config": {
-        "vendor-dir": "src/includes/modules/payment/coinbase/vendor"
+        "vendor-dir": "src/includes/modules/payment/privacygate/vendor"
     }
 }

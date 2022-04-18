@@ -1,7 +1,7 @@
 <?php
 require_once 'includes/application_top.php';
-require_once __DIR__ . '/includes/modules/payment/coinbase/vendor/autoload.php';
-require_once __DIR__ . '/includes/modules/payment/coinbase/const.php';
+require_once __DIR__ . '/includes/modules/payment/privacygate/vendor/autoload.php';
+require_once __DIR__ . '/includes/modules/payment/privacygate/const.php';
 
 class Webhook
 {
@@ -18,7 +18,7 @@ class Webhook
     private function loadModuleParams()
     {
         $settings = tep_db_query("SELECT configuration_key,configuration_value FROM " . TABLE_CONFIGURATION
-            . " WHERE configuration_key LIKE 'MODULE\_PAYMENT\_COINBASE\_%'");
+            . " WHERE configuration_key LIKE 'MODULE\_PAYMENT\_PRIVACYGATE\_%'");
 
         if (tep_db_num_rows($settings) === 0) {
             $this->failProcess('Settings not found.');
@@ -60,7 +60,7 @@ class Webhook
             case 'PENDING':
                 $this->updateOrderStatus(
                     $orderId,
-                    $this->getModuleParam('MODULE_PAYMENT_COINBASE_PENDING_STATUS_ID'),
+                    $this->getModuleParam('MODULE_PAYMENT_PRIVACYGATE_PENDING_STATUS_ID'),
                     sprintf(
                         'Charge %s is pending. Charge has been detected but has not been confirmed yet.',
                         $charge['id']
@@ -70,7 +70,7 @@ class Webhook
             case 'NEW':
                 $this->updateOrderStatus(
                     $orderId,
-                    $this->getModuleParam('MODULE_PAYMENT_COINBASE_PENDING_STATUS_ID'),
+                    $this->getModuleParam('MODULE_PAYMENT_PRIVACYGATE_PENDING_STATUS_ID'),
                     sprintf('Charge %s was created. Awaiting payment.', $charge['id'])
                 );
                 return;
@@ -81,7 +81,7 @@ class Webhook
                 } else {
                     $this->updateOrderStatus(
                         $orderId,
-                        $this->getModuleParam('MODULE_PAYMENT_COINBASE_UNRESOLVED_STATUS_ID'),
+                        $this->getModuleParam('MODULE_PAYMENT_PRIVACYGATE_UNRESOLVED_STATUS_ID'),
                         sprintf('Charge %s was unresolved.', $charge['id'])
                     );
                 }
@@ -89,14 +89,14 @@ class Webhook
             case 'CANCELED':
                 $this->updateOrderStatus(
                     $orderId,
-                    $this->getModuleParam('MODULE_PAYMENT_COINBASE_CANCELED_STATUS_ID'),
+                    $this->getModuleParam('MODULE_PAYMENT_PRIVACYGATE_CANCELED_STATUS_ID'),
                     sprintf('Charge %s was canceled.', $charge['id'])
                 );
                 return;
             case 'EXPIRED':
                 $this->updateOrderStatus(
                     $orderId,
-                    $this->getModuleParam('MODULE_PAYMENT_COINBASE_EXPIRED_STATUS_ID'),
+                    $this->getModuleParam('MODULE_PAYMENT_PRIVACYGATE_EXPIRED_STATUS_ID'),
                     sprintf('Charge %s has expired.', $charge['id'])
                 );
                 return;
@@ -118,7 +118,7 @@ class Webhook
         if ($transactionId) {
             $this->updateOrderStatus(
                 $orderId,
-                $this->getModuleParam('MODULE_PAYMENT_COINBASE_PROCESSING_STATUS_ID'),
+                $this->getModuleParam('MODULE_PAYMENT_PRIVACYGATE_PROCESSING_STATUS_ID'),
                 sprintf('Charge %s was paid. Received amount %s %s', $charge['id'], $amount, $currency)
             );
         } else {
@@ -144,13 +144,13 @@ class Webhook
 
     private function getEvent()
     {
-        $secretKey = $this->getModuleParam('MODULE_PAYMENT_COINBASE_SHARED_SECRET');
+        $secretKey = $this->getModuleParam('MODULE_PAYMENT_PRIVACYGATE_SHARED_SECRET');
         $headers = array_change_key_case(getallheaders());
         $signatureHeader = isset($headers[SIGNATURE_HEADER]) ? $headers[SIGNATURE_HEADER] : null;
         $payload = trim(file_get_contents('php://input'));
 
         try {
-            $event = \CoinbaseCommerce\Webhook::buildEvent($payload, $signatureHeader, $secretKey);
+            $event = \PrivacyGate\Webhook::buildEvent($payload, $signatureHeader, $secretKey);
         } catch (\Exception $exception) {
             $this->failProcess($exception->getMessage());
         }
@@ -160,17 +160,17 @@ class Webhook
 
     private function getCharge($chargeId)
     {
-        $apiKey = $this->getModuleParam('MODULE_PAYMENT_COINBASE_API_KEY');
-        \CoinbaseCommerce\ApiClient::init($apiKey);
+        $apiKey = $this->getModuleParam('MODULE_PAYMENT_PRIVACYGATE_API_KEY');
+        \PrivacyGate\ApiClient::init($apiKey);
 
         try {
-            $charge = \CoinbaseCommerce\Resources\Charge::retrieve($chargeId);
+            $charge = \PrivacyGate\Resources\Charge::retrieve($chargeId);
         } catch (\Exception $exception) {
             $this->failProcess($exception->getMessage());
         }
 
         if (!$charge) {
-            $this->failProcess('Charge was not found in Coinbase Commerce.');
+            $this->failProcess('Charge was not found in PrivacyGate.');
         }
 
         if ($charge->metadata[METADATA_SOURCE_PARAM] != METADATA_SOURCE_VALUE) {
