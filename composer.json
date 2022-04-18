@@ -1,8 +1,11 @@
 {
-    "name": "privacyshore/privacygate-oscommerce",
+    "name": "privacygate/privacygate-oscommerce",
     "description": "PrivacyGate plugin for OsCommerce",
     "type": "composer-plugin",
     "license": "Apache-2.0",
+    "require": {
+        "privacygate/privacygate": "^1.0.0"
+    },
     "config": {
         "vendor-dir": "src/includes/modules/payment/privacygate/vendor"
     }
